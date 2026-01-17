@@ -1,10 +1,14 @@
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import {
+  CommnentStatus,
+  Post,
+  PostStatus,
+} from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
 const createPost = async (
   data: Omit<Post, "id" | "createdAt" | "updatedAt" | "authorId">,
-  userId: string
+  userId: string,
 ) => {
   const result = await prisma.post.create({
     data: {
@@ -88,6 +92,14 @@ const getAllPost = async (payload: {
     orderBy: {
       [payload.sortBy]: payload.sortOrder,
     },
+
+    include:{
+      _count:{
+        select:{
+          comments:true
+        }
+      }
+    }
   });
 
   const total = await prisma.post.count({
@@ -95,6 +107,9 @@ const getAllPost = async (payload: {
       AND: andCondition,
     },
   });
+
+
+ 
 
   return {
     data: result,
@@ -109,7 +124,7 @@ const getAllPost = async (payload: {
 
 const getPostById = async (postId: string) => {
   const result = await prisma.$transaction(async (anyName) => {
-      await anyName.post.update({
+    await anyName.post.update({
       where: {
         id: postId,
       },
@@ -124,11 +139,43 @@ const getPostById = async (postId: string) => {
       where: {
         id: postId,
       },
+      include: {
+        comments: {
+          where: {
+            parentId: null,
+            status: CommnentStatus.APPROVED,
+          },
+
+          orderBy: { createdAt: "desc" },
+          include: {
+            replies: {
+              where: {
+                status: CommnentStatus.APPROVED,
+              },
+              orderBy:{createdAt:"asc"},
+              include: {
+                replies: {
+                  where: {
+                    status: CommnentStatus.APPROVED,
+                  },
+                  orderBy:{createdAt:"asc"}
+                },
+              },
+            },
+          },
+        },
+
+        _count:{
+          select:{
+            comments:true
+          }
+        }
+      },
     });
     return postData;
   });
 
-  return result
+  return result;
 };
 
 export const postService = {
