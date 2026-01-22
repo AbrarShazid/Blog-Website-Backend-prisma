@@ -58,7 +58,7 @@ const getAllPost = async (req: Request, res: Response) => {
     const authorId = req.query.authorId as string | undefined;
 
     const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(
-      req.query
+      req.query,
     );
 
     const result = await postService.getAllPost({
@@ -106,8 +106,28 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
+const getMyPosts = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new Error("User is Unauthorized!");
+    }
+
+    const result = await postService.getMyPosts(user.id);
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({
+      error: "Post fetched failed!",
+      details: error,
+    });
+  }
+};
+
 export const PostController = {
   createPost,
   getAllPost,
   getPostById,
+  getMyPosts,
 };

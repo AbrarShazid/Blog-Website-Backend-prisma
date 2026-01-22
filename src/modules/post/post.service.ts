@@ -93,13 +93,13 @@ const getAllPost = async (payload: {
       [payload.sortBy]: payload.sortOrder,
     },
 
-    include:{
-      _count:{
-        select:{
-          comments:true
-        }
-      }
-    }
+    include: {
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
   });
 
   const total = await prisma.post.count({
@@ -107,9 +107,6 @@ const getAllPost = async (payload: {
       AND: andCondition,
     },
   });
-
-
- 
 
   return {
     data: result,
@@ -152,24 +149,24 @@ const getPostById = async (postId: string) => {
               where: {
                 status: CommnentStatus.APPROVED,
               },
-              orderBy:{createdAt:"asc"},
+              orderBy: { createdAt: "asc" },
               include: {
                 replies: {
                   where: {
                     status: CommnentStatus.APPROVED,
                   },
-                  orderBy:{createdAt:"asc"}
+                  orderBy: { createdAt: "asc" },
                 },
               },
             },
           },
         },
 
-        _count:{
-          select:{
-            comments:true
-          }
-        }
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
       },
     });
     return postData;
@@ -178,8 +175,44 @@ const getPostById = async (postId: string) => {
   return result;
 };
 
+const getMyPosts = async (authorId: string) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authorId,
+      status: "ACTIVE",
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const result = await prisma.post.findMany({
+    where: {
+      authorId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
+  // const total=await prisma.post.count({
+  //   where:{
+  //     authorId
+  //   }
+  // })
+
+  return result;
+};
+
 export const postService = {
   createPost,
   getAllPost,
   getPostById,
+  getMyPosts,
 };
