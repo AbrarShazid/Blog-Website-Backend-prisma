@@ -27,4 +27,10 @@ router.patch(
   commentController.updateComment,
 );
 
+router.patch(
+  "/:commentId/statuschange",
+  authMiddleware(UserRole.ADMIN),
+  commentController.updateCommentStatus,
+);
+
 export const commentRouter: Router = router;

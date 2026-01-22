@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import { commentService } from "./comment.service";
 
 const createComment = async (req: Request, res: Response) => {
@@ -74,10 +74,32 @@ const updateComment = async (req: Request, res: Response) => {
     });
   }
 };
+
+const updateCommentStatus = async (req: Request, res: Response) => {
+  try {
+    const { commentId } = req.params;
+
+    const result = await commentService.updateCommentStatus(
+      commentId as string,
+      req.body,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Comment update Failed!";
+
+    res.status(400).json({
+      error: errorMessage,
+      details: error,
+    });
+  }
+};
+
 export const commentController = {
   createComment,
   getCommentById,
   getCommentByAuthor,
   deleteComment,
   updateComment,
+  updateCommentStatus,
 };

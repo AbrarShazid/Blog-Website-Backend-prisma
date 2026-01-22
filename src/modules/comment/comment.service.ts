@@ -125,10 +125,43 @@ const updateComment = async (
   });
 };
 
+const updateCommentStatus = async (
+  id: string,
+  data: {
+    status: CommnentStatus;
+  },
+) => {
+  const commentData = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
+
+  if (commentData.status === data.status) {
+    throw new Error(
+      `Your provided status (${data.status}) is already up to date.`,
+    );
+  }
+
+  const update = await prisma.comment.update({
+    where: {
+      id,
+    },
+    data,
+  });
+
+  return update;
+};
+
 export const commentService = {
   createComment,
   getCommentById,
   getCommentByAuthor,
   deleteComment,
   updateComment,
+  updateCommentStatus,
 };
