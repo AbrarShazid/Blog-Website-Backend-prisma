@@ -268,14 +268,84 @@ const deletePost = async (
     throw new Error("You are not owner,cann't delete");
   }
 
-  const result=await prisma.post.delete({
-    where:{
-      id:postId
-    }
-  })
+  const result = await prisma.post.delete({
+    where: {
+      id: postId,
+    },
+  });
 
-  return result
+  return result;
+};
 
+const getStats = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const [
+      totalPost,
+      totalPublishedPost,
+      totalDraftPost,
+      totalArchivedPost,
+      totalComments,
+      approvedComments,
+      totalUsers,
+      adminCount,
+      userCount,
+      totalViews,
+    ] = await Promise.all([
+      await tx.post.count(),
+      await tx.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+      }),
+      await tx.post.count({
+        where: {
+          status: PostStatus.DRAFT,
+        },
+      }),
+
+      await tx.post.count({
+        where: {
+          status: PostStatus.ARCHIVED,
+        },
+      }),
+
+      await tx.comment.count(),
+      await tx.comment.count({
+        where: {
+          status: CommnentStatus.APPROVED,
+        },
+      }),
+
+      await tx.user.count(),
+      await tx.user.count({
+        where: {
+          role: "ADMIN",
+        },
+      }),
+      await tx.user.count({
+        where: {
+          role: "USER",
+        },
+      }),
+
+      await tx.post.aggregate({
+        _sum: { views: true },
+      }),
+    ]);
+
+    return {
+      totalPost,
+      totalPublishedPost,
+      totalDraftPost,
+      totalArchivedPost,
+      totalComments,
+      approvedComments,
+      totalUsers,
+      adminCount,
+      userCount,
+      totalViews: totalViews._sum.views,
+    };
+  });
 };
 
 export const postService = {
@@ -284,5 +354,6 @@ export const postService = {
   getPostById,
   getMyPosts,
   updatePost,
-  deletePost
+  deletePost,
+  getStats,
 };

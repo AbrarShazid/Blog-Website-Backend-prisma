@@ -7,6 +7,12 @@ const router = Router();
 router.get("/", PostController.getAllPost);
 
 router.get(
+  "/stats",
+  // authMiddleware(UserRole.ADMIN),
+  PostController.getStats,
+);
+
+router.get(
   "/my-posts",
   authMiddleware(UserRole.USER, UserRole.ADMIN),
   PostController.getMyPosts,
@@ -26,6 +32,10 @@ router.patch(
   PostController.updatePost,
 );
 
-router.delete('/:postId',authMiddleware(UserRole.USER, UserRole.ADMIN),PostController.deletePost)
+router.delete(
+  "/:postId",
+  authMiddleware(UserRole.USER, UserRole.ADMIN),
+  PostController.deletePost,
+);
 
 export const postRouter: Router = router;
