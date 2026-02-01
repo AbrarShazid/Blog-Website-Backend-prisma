@@ -43,9 +43,8 @@ export const auth = betterAuth({
     requireEmailVerification: true,
   },
   emailVerification: {
-
-    sendOnSignUp:true,
-    autoSignInAfterVerification:true,
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
 
     sendVerificationEmail: async ({ user, url, token }, request) => {
       try {
@@ -168,23 +167,21 @@ export const auth = betterAuth({
 
         console.log(user.email);
       } catch (error) {
-
         console.log(error);
-        throw error
-        
+        throw error;
       }
     },
   },
 
-     socialProviders: {
-        google: { 
-            prompt:"select_account consent",
-            accessType:"offline",
+  socialProviders: {
+    google: {
+      prompt: "select_account consent",
+      accessType: "offline",
 
-            clientId: process.env.google_oauth_client_id as string, 
-            clientSecret: process.env.google_oauth_client_secret as string, 
-
-            
-        }, 
+      clientId: process.env.google_oauth_client_id as string,
+      clientSecret: process.env.google_oauth_client_secret as string,
     },
+  },
+
+ 
 });

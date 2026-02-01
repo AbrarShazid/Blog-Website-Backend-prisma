@@ -93,9 +93,12 @@ const getPostById = async (req: Request, res: Response) => {
       // it basically added to resolve the ts error in this case
     }
 
-    const result = await postService.getPostById(postId);
+    const result = await postService.getPostById(postId as string);
 
-    res.status(200).json(result);
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
   } catch (error) {
     res.status(400).json({
       error: "Data can't be fetched!",
